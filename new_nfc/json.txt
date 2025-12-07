@@ -1,0 +1,166 @@
+{
+"project_name": "Attendance Management System",
+"description": "A web-based attendance management system using HTML, Tailwind CSS, JavaScript, and PHP with PDO for database interactions. Supports admin for assigning teachers, teacher for managing lectures and reports, students for viewing attendance. NFC simulated via forms/links.",
+"technologies": [
+"HTML5",
+"Tailwind CSS (via CDN for simplicity)",
+"JavaScript (vanilla)",
+"PHP 8+",
+"MySQL (database)",
+"PDO (for DB connections)"
+],
+"database": {
+"name": "attendance_db",
+"tables": [
+{
+"name": "users",
+"columns": [
+{"name": "id", "type": "INT AUTO_INCREMENT PRIMARY KEY"},
+{"name": "username", "type": "VARCHAR(50) UNIQUE"},
+{"name": "password", "type": "VARCHAR(255)"},
+{"name": "role", "type": "ENUM('admin', 'teacher', 'student')"}
+]
+},
+{
+"name": "teachers",
+"columns": [
+{"name": "id", "type": "INT AUTO_INCREMENT PRIMARY KEY"},
+{"name": "user_id", "type": "INT"},
+{"name": "name", "type": "VARCHAR(100)"},
+{"foreign_keys": ["user_id REFERENCES users(id) ON DELETE CASCADE"]}
+]
+},
+{
+"name": "students",
+"columns": [
+{"name": "id", "type": "INT AUTO_INCREMENT PRIMARY KEY"},
+{"name": "user_id", "type": "INT"},
+{"name": "name", "type": "VARCHAR(100)"},
+{"name": "class_id", "type": "INT"},
+{"foreign_keys": ["user_id REFERENCES users(id) ON DELETE CASCADE", "class_id REFERENCES classes(id) ON DELETE SET NULL"]}
+]
+},
+{
+"name": "classes",
+"columns": [
+{"name": "id", "type": "INT AUTO_INCREMENT PRIMARY KEY"},
+{"name": "name", "type": "VARCHAR(50)"}
+]
+},
+{
+"name": "subjects",
+"columns": [
+{"name": "id", "type": "INT AUTO_INCREMENT PRIMARY KEY"},
+{"name": "name", "type": "VARCHAR(100)"}
+]
+},
+{
+"name": "assignments",
+"columns": [
+{"name": "id", "type": "INT AUTO_INCREMENT PRIMARY KEY"},
+{"name": "teacher_id", "type": "INT"},
+{"name": "subject_id", "type": "INT"},
+{"name": "class_id", "type": "INT"},
+{"foreign_keys": ["teacher_id REFERENCES teachers(id) ON DELETE CASCADE", "subject_id REFERENCES subjects(id) ON DELETE CASCADE", "class_id REFERENCES classes(id) ON DELETE CASCADE"]}
+]
+},
+{
+"name": "lectures",
+"columns": [
+{"name": "id", "type": "INT AUTO_INCREMENT PRIMARY KEY"},
+{"name": "assignment_id", "type": "INT"},
+{"name": "start_time", "type": "DATETIME"},
+{"name": "end_time", "type": "DATETIME DEFAULT NULL"},
+{"foreign_keys": ["assignment_id REFERENCES assignments(id) ON DELETE CASCADE"]}
+]
+},
+{
+"name": "attendances",
+"columns": [
+{"name": "id", "type": "INT AUTO_INCREMENT PRIMARY KEY"},
+{"name": "lecture_id", "type": "INT"},
+{"name": "student_id", "type": "INT"},
+{"name": "timestamp", "type": "DATETIME DEFAULT CURRENT_TIMESTAMP"},
+{"foreign_keys": ["lecture_id REFERENCES lectures(id) ON DELETE CASCADE", "student_id REFERENCES students(id) ON DELETE CASCADE"]}
+]
+}
+],
+"setup_sql": "CREATE DATABASE attendance_db; USE attendance_db; -- Then create tables as above. Insert sample data if needed."
+},
+"project_structure": {
+"root": {
+"files": [
+"index.php",
+"login.php",
+"logout.php",
+"dashboard.php"
+],
+"folders": {
+"admin": {
+"files": [
+"create_teacher.php",
+"assign_subject.php"
+]
+},
+"teacher": {
+"files": [
+"start_lecture.php",
+"end_lecture.php",
+"view_attendance.php",
+"reports.php"
+]
+},
+"student": {
+"files": [
+"mark_attendance.php",
+"view_my_attendance.php"
+]
+},
+"includes": {
+"files": [
+"db.php",
+"header.php",
+"footer.php",
+"functions.php"
+]
+},
+"css": {
+"files": []  // Empty, since using Tailwind CDN
+},
+"js": {
+"files": [
+"scripts.js"
+]
+}
+}
+}
+},
+"dependencies": {
+"external": [
+"Tailwind CSS CDN: https://cdn.tailwindcss.com",
+"PHP with PDO and MySQL extension",
+"Web server like Apache/XAMPP",
+"MySQL database"
+],
+"internal": {
+"db.php": "Used in all PHP files for DB connection",
+"header.php": "Included at top of all pages for navbar/layout",
+"footer.php": "Included at bottom of all pages",
+"functions.php": "Helper functions like auth checks",
+"scripts.js": "For client-side interactions like forms, filters"
+}
+},
+"setup_guide": [
+"1. Set up XAMPP or similar: Start Apache and MySQL.",
+"2. Create database: Run the setup_sql in phpMyAdmin or MySQL CLI.",
+"3. Place project files in htdocs/attendance folder.",
+"4. Configure db.php with your DB credentials (host: localhost, user: root, pass: '', db: attendance_db).",
+"5. Access via http://localhost/attendance/index.php.",
+"6. Create admin user manually in DB: INSERT INTO users (username, password, role) VALUES ('admin', '" . password_hash('adminpass', PASSWORD_DEFAULT) . "', 'admin');",
+"7. For NFC: This is simulated. In real, NFC tags would link to URLs like /teacher/start_lecture.php?tag_id=XYZ, but here use forms/buttons.",
+"8. Passwords are hashed with password_hash().",
+"9. Sessions used for auth.",
+"10. Add sample data: Insert classes, subjects, etc., via admin pages."
+],
+"nfc_simulation": "NFC taps simulated via buttons/forms. In production, NFC reader would POST to server with tag data. Tags could contain URLs like 'http://yourdomain/teacher/start_lecture.php?teacher_id=1&class_id=1' for teachers, or 'http://yourdomain/student/mark_attendance.php?student_id=1&lecture_id=active' for students."
+}
